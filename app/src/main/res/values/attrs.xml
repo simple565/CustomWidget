@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CircularProgressBar">
+        <!--圆形进度框宽高-->
+        <attr name="barSize" format="dimension" />
+        <!--波纹最大宽高-->
+        <attr name="CorrugatedMaxSize" format="dimension" />
+        <!--进度条-->
+        <attr name="barBackgroundColor" format="color" />
+        <attr name="barActionColor" format="color" />
+        <attr name="barWidth" format="dimension" />
+        <!--命中数量-->
+        <attr name="matchNumTextSize" format="dimension" />
+        <attr name="matchNumTextColor" format="color" />
+        <attr name="matchNumText" format="string" />
+
+        <attr name="tipTextSize" format="dimension" />
+        <attr name="tipTextColor" format="color" />
+        <attr name="tipText" format="string" />
+        <!--计时时间-->
+        <attr name="timeTextSize" format="dimension" />
+        <attr name="timeTextColor" format="color" />
+        <attr name="timeText" format="string" />
+        <!--进度框中心填充色-->
+        <attr name="centerColor" format="reference" />
+    </declare-styleable>
+
+</resources>
