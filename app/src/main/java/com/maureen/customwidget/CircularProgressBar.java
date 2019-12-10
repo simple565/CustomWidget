@@ -1,20 +1,15 @@
 package com.maureen.customwidget;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PathMeasure;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
@@ -25,6 +20,8 @@ import java.util.List;
 
 public class CircularProgressBar extends View {
     private static final String TAG = CircularProgressBar.class.getSimpleName();
+
+
     // view宽度
     private int width;
 
@@ -129,7 +126,7 @@ public class CircularProgressBar extends View {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.CircularProgressBar);
         barSize = typedArray.getDimensionPixelSize(R.styleable.CircularProgressBar_barSize, dp2px(100));
         barWidth = typedArray.getDimensionPixelSize(R.styleable.CircularProgressBar_barWidth, dp2px(3));
-        barBackgroundColor = typedArray.getColor(R.styleable.CircularProgressBar_barBackgroundColor, getResources().getColor(android.R.color.darker_gray));
+        barBackgroundColor = typedArray.getColor(R.styleable.CircularProgressBar_barBackgroundColor, getResources().getColor(R.color.blue_dart));
         barActionColor = typedArray.getColor(R.styleable.CircularProgressBar_barActionColor, getResources().getColor(android.R.color.white));
 
         matchNumTextSize = typedArray.getDimensionPixelSize(R.styleable.CircularProgressBar_matchNumTextSize, 50);
@@ -144,7 +141,7 @@ public class CircularProgressBar extends View {
         timeTextColor = typedArray.getColor(R.styleable.CircularProgressBar_timeTextColor, getResources().getColor(android.R.color.white));
         timeText = typedArray.getString(R.styleable.CircularProgressBar_timeText);
 
-        centerColor = typedArray.getResourceId(R.styleable.CircularProgressBar_centerColor, getResources().getColor(android.R.color.black));
+        centerColor = typedArray.getResourceId(R.styleable.CircularProgressBar_centerColor, getResources().getColor(R.color.blue));
 
         if (TextUtils.isEmpty(matchNumText)) {
             matchNumText = "0";
@@ -174,7 +171,6 @@ public class CircularProgressBar extends View {
         mProgressArcPaint.setColor(barActionColor);//槽填充颜色
         mProgressArcPaint.setStyle(Paint.Style.STROKE);
         mProgressArcPaint.setStrokeCap(Paint.Cap.ROUND);
-        mProgressArcPaint.setAntiAlias(true);
 
         //命中数量文字画笔
         matchNumTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -205,11 +201,12 @@ public class CircularProgressBar extends View {
 
     public void setCenterColor(int centerColor) {
         this.centerColor = centerColor;
-        mCenterCirclePaint.setColor(centerColor);
+        mCenterCirclePaint.setColor(this.centerColor);
     }
 
     public void setBackgroundArcColor(int backgroundArcColor) {
         this.barBackgroundColor = backgroundArcColor;
+        mBackgroundArcPaint.setColor(this.barBackgroundColor);
     }
 
     @Override
@@ -253,9 +250,9 @@ public class CircularProgressBar extends View {
         mMiddleProgressRect = new RectF((maxWidth / 2) - radius, (maxHeight / 2) - radius, (maxWidth / 2)
                 + radius, (maxHeight / 2) + radius);
         //********************波纹圆*************************
-        if (!mMaxRadiusSet) {
+        /*if (!mMaxRadiusSet) {
             mMaxRadius = Math.min(w, h) * mMaxRadiusRate / 2.0f;
-        }
+        }*/
     }
 
 
