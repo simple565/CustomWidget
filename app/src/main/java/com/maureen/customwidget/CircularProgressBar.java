@@ -101,8 +101,6 @@ public class CircularProgressBar extends View {
     //圆环中心填充颜色
     private int centerColor;
 
-    //圆环进度头图片
-
 
     public CircularProgressBar(Context context) {
         this(context, null);
