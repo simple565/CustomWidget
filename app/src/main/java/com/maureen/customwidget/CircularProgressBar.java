@@ -8,10 +8,11 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -126,22 +127,22 @@ public class CircularProgressBar extends View {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.CircularProgressBar);
         barSize = typedArray.getDimensionPixelSize(R.styleable.CircularProgressBar_barSize, dp2px(100));
         barWidth = typedArray.getDimensionPixelSize(R.styleable.CircularProgressBar_barWidth, dp2px(3));
-        barBackgroundColor = typedArray.getColor(R.styleable.CircularProgressBar_barBackgroundColor, getResources().getColor(R.color.blue_dart));
-        barActionColor = typedArray.getColor(R.styleable.CircularProgressBar_barActionColor, getResources().getColor(android.R.color.white));
+        barBackgroundColor = typedArray.getColor(R.styleable.CircularProgressBar_barBackgroundColor, ContextCompat.getColor(mContext, R.color.blue_dart));
+        barActionColor = typedArray.getColor(R.styleable.CircularProgressBar_barActionColor, ContextCompat.getColor(mContext, android.R.color.white));
 
         matchNumTextSize = typedArray.getDimensionPixelSize(R.styleable.CircularProgressBar_matchNumTextSize, 50);
-        matchNumTextColor = typedArray.getColor(R.styleable.CircularProgressBar_matchNumTextColor, getResources().getColor(android.R.color.white));
+        matchNumTextColor = typedArray.getColor(R.styleable.CircularProgressBar_matchNumTextColor, ContextCompat.getColor(mContext, (android.R.color.white)));
         matchNumText = typedArray.getString(R.styleable.CircularProgressBar_matchNumText);
 
         tipTextSize = typedArray.getDimensionPixelSize(R.styleable.CircularProgressBar_tipTextSize, 17);
-        tipTextColor = typedArray.getColor(R.styleable.CircularProgressBar_tipTextColor, getResources().getColor(android.R.color.white));
+        tipTextColor = typedArray.getColor(R.styleable.CircularProgressBar_tipTextColor, ContextCompat.getColor(mContext, android.R.color.white));
         tipText = typedArray.getString(R.styleable.CircularProgressBar_tipText);
 
         timeTextSize = typedArray.getDimensionPixelSize(R.styleable.CircularProgressBar_timeTextSize, 15);
-        timeTextColor = typedArray.getColor(R.styleable.CircularProgressBar_timeTextColor, getResources().getColor(android.R.color.white));
+        timeTextColor = typedArray.getColor(R.styleable.CircularProgressBar_timeTextColor, ContextCompat.getColor(mContext, android.R.color.white));
         timeText = typedArray.getString(R.styleable.CircularProgressBar_timeText);
 
-        centerColor = typedArray.getResourceId(R.styleable.CircularProgressBar_centerColor, getResources().getColor(R.color.blue));
+        centerColor = typedArray.getResourceId(R.styleable.CircularProgressBar_centerColor, ContextCompat.getColor(mContext, R.color.blue));
 
         if (TextUtils.isEmpty(matchNumText)) {
             matchNumText = "0";
@@ -201,12 +202,10 @@ public class CircularProgressBar extends View {
 
     public void setCenterColor(int centerColor) {
         this.centerColor = centerColor;
-        mCenterCirclePaint.setColor(this.centerColor);
     }
 
     public void setBackgroundArcColor(int backgroundArcColor) {
         this.barBackgroundColor = backgroundArcColor;
-        mBackgroundArcPaint.setColor(this.barBackgroundColor);
     }
 
     @Override
@@ -219,7 +218,7 @@ public class CircularProgressBar extends View {
     }
 
     private int resolveMeasured(int measureSpec, int desired) {
-        int result = 0;
+        int result;
         int specSize = MeasureSpec.getSize(measureSpec);
         switch (MeasureSpec.getMode(measureSpec)) {
             case MeasureSpec.UNSPECIFIED:
@@ -238,7 +237,6 @@ public class CircularProgressBar extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        Log.d(TAG, "onSizeChanged: ");
         maxWidth = w;
         maxHeight = h;
         width = barSize;
@@ -249,25 +247,21 @@ public class CircularProgressBar extends View {
 
         mMiddleProgressRect = new RectF((maxWidth / 2) - radius, (maxHeight / 2) - radius, (maxWidth / 2)
                 + radius, (maxHeight / 2) + radius);
-        //********************波纹圆*************************
-        /*if (!mMaxRadiusSet) {
-            mMaxRadius = Math.min(w, h) * mMaxRadiusRate / 2.0f;
-        }*/
+        if (!mMaxRadiusSet) {
+            mMaxRadius = Math.min(w, h) * 1.0f / 2.0f - barWidth;
+        }
+        mInitialRadius = radius * 1.0f + barWidth;
     }
 
 
     @Override
     protected void onDraw(Canvas canvas) {
-
         super.onDraw(canvas);
-
         center = getWidth() / 2;
         radius = barSize / 2;
         canvas.drawCircle(center, center, radius, mCenterCirclePaint);
         canvas.drawCircle(center, center, radius, mBackgroundArcPaint);
-
         drawText(canvas);
-
 
         //*******************波纹圆*********************
         Iterator<Circle> iterator = mCircleList.iterator();
@@ -276,6 +270,7 @@ public class CircularProgressBar extends View {
             float radius = circle.getCurrentRadius();
             if (System.currentTimeMillis() - circle.mCreateTime < mDuration) {
                 mCirclePaint.setAlpha(circle.getAlpha());
+                mCirclePaint.setStyle(Paint.Style.STROKE);
                 canvas.drawCircle(center, center, radius, mCirclePaint);
             } else {
                 iterator.remove();
@@ -307,11 +302,14 @@ public class CircularProgressBar extends View {
     private Interpolator mInterpolator = new LinearInterpolator();
 
     private Paint mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private float mInitialRadius = radius;   // 初始波纹半径
-    private float mMaxRadius = (getWidth() - 30) / 2;   // 最大波纹半径
-    private long mDuration = 2000; // 一个波纹从创建到消失的持续时间
-    private int mSpeed = 500;   // 波纹的创建速度，每500ms创建一个
-    private float mMaxRadiusRate = 1.0f;
+    // 初始波纹半径
+    private float mInitialRadius = radius;
+    // 最大波纹半径
+    private float mMaxRadius = (getWidth() - 30) / 2;
+    // 一个波纹从创建到消失的持续时间
+    private long mDuration = 2000;
+    // 波纹的创建速度，每500ms创建一个
+    private int mSpeed = 500;
     private boolean mMaxRadiusSet;
 
     private boolean mIsRunning;
@@ -332,16 +330,11 @@ public class CircularProgressBar extends View {
         mCirclePaint.setColor(color);
     }
 
-
     public void start() {
         if (!mIsRunning) {
             mIsRunning = true;
             mCreateCircle.run();
         }
-    }
-
-    public void setStyle(Paint.Style style) {
-        mCirclePaint.setStyle(style);
     }
 
     public void setDuration(long duration) {

@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
         CircularProgressBar circularProgressBar = findViewById(R.id.sesame_view);
         circularProgressBar.setMatchNumText("12");
         circularProgressBar.setDuration(5000);
-        circularProgressBar.setStyle(Paint.Style.FILL);
         circularProgressBar.setColor(ContextCompat.getColor(this, R.color.colorAccent));
         circularProgressBar.setInterpolator(new LinearOutSlowInInterpolator());
         circularProgressBar.setMaxRadius(500);
