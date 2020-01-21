@@ -2,7 +2,6 @@ package com.maureen.customwidget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -18,63 +17,80 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-
+/**
+ * @author Lianml
+ * @date 2019/11/30
+ */
 public class CircularProgressBar extends View {
     private static final String TAG = CircularProgressBar.class.getSimpleName();
-
-
-    // view宽度
+    /**
+     * view宽度
+     */
     private int width;
-
-    // view高度
+    /**
+     * view高度
+     */
     private int height;
 
-    //  圆环起始角度
-    private final static float mStartAngle = 90f;
-
-    // 圆环结束角度
-    private final static float mEndAngle = 360f;
-
-    //外层圆环画笔
+    /**
+     * 外层圆环画笔
+     */
     private Paint mBackgroundArcPaint;
-
-    //进度圆环画笔
+    /**
+     * 进度圆环画笔
+     */
     private Paint mProgressArcPaint;
 
-    //中心实心圆画笔
+    /**
+     * 中心实心圆画笔
+     */
     private Paint mCenterCirclePaint;
 
-    //命中数量文本画笔
+    /**
+     * 命中数量文本画笔
+     */
     private Paint matchNumTextPaint;
 
-    //命中数量提示文本画笔
+    /**
+     * 命中数量提示文本画笔
+     */
     private Paint tipTextPaint;
 
-    //计时器文字画笔
+    /**
+     * 计时器文字画笔
+     */
     private Paint timeTextPaint;
 
     private int center;
 
-
-    //半径
+    /**
+     * 半径
+     */
     private int radius;
 
-    //外层矩形
+    /**
+     * 外层矩形
+     */
     private RectF mMiddleRect;
 
-    //进度矩形
+    /**
+     * 进度矩形
+     */
     private RectF mMiddleProgressRect;
 
-    // 当前进度
+    /**
+     * 当前进度
+     */
     private float mCurrentAngle = 0f;
 
-    //总进度
+    /**
+     * 总进度
+     */
     private float mTotalAngle = 360f;
 
-    //图片
-    private Bitmap bitmap;
-
-    //进度头画笔
+    /**
+     * 进度头画笔
+     */
     private Paint mBitmapPaint;
 
     private Context mContext;
@@ -97,8 +113,9 @@ public class CircularProgressBar extends View {
     private int timeTextSize;
     private int timeTextColor;
     private String timeText;
-
-    //圆环中心填充颜色
+    /**
+     * 圆环中心填充颜色
+     */
     private int centerColor;
 
 
@@ -166,8 +183,10 @@ public class CircularProgressBar extends View {
 
         //外层进度画笔
         mProgressArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mProgressArcPaint.setStrokeWidth(barWidth);//设置槽宽度
-        mProgressArcPaint.setColor(barActionColor);//槽填充颜色
+        //设置槽宽度
+        mProgressArcPaint.setStrokeWidth(barWidth);
+        //槽填充颜色
+        mProgressArcPaint.setColor(barActionColor);
         mProgressArcPaint.setStyle(Paint.Style.STROKE);
         mProgressArcPaint.setStrokeCap(Paint.Cap.ROUND);
 
@@ -188,6 +207,7 @@ public class CircularProgressBar extends View {
         timeTextPaint.setColor(timeTextColor);
         timeTextPaint.setTextSize(timeTextSize);
         timeTextPaint.setTextAlign(Paint.Align.CENTER);
+        typedArray.recycle();
     }
 
     public void setMatchNumText(String matchNumText) {
@@ -199,11 +219,11 @@ public class CircularProgressBar extends View {
     }
 
     public void setCenterColor(int centerColor) {
-        this.centerColor = centerColor;
+        mCenterCirclePaint.setColor(ContextCompat.getColor(mContext, centerColor));
     }
 
     public void setBackgroundArcColor(int backgroundArcColor) {
-        this.barBackgroundColor = backgroundArcColor;
+        mBackgroundArcPaint.setColor(ContextCompat.getColor(mContext, backgroundArcColor));
     }
 
     @Override
@@ -245,9 +265,7 @@ public class CircularProgressBar extends View {
 
         mMiddleProgressRect = new RectF((maxWidth / 2) - radius, (maxHeight / 2) - radius, (maxWidth / 2)
                 + radius, (maxHeight / 2) + radius);
-        if (!mMaxRadiusSet) {
-            mMaxRadius = Math.min(w, h) * 1.0f / 2.0f - barWidth;
-        }
+        mMaxRadius = Math.min(w, h) * 1.0f / 2.0f - barWidth;
         mInitialRadius = radius * 1.0f + barWidth;
     }
 
@@ -281,12 +299,11 @@ public class CircularProgressBar extends View {
 
     private void drawText(Canvas canvas) {
         //正常绘制命中数量文本
-        canvas.drawText(matchNumText, (maxWidth / 2), (maxHeight / 2) - dp2px(8), matchNumTextPaint);
+        canvas.drawText(matchNumText, (maxWidth >> 1), (maxHeight / 2) - dp2px(8), matchNumTextPaint);
         //绘制命中数量提示文本
-        canvas.drawText(tipText, (maxWidth / 2), (maxHeight / 2) + dp2px(18), tipTextPaint);
+        canvas.drawText(tipText, (maxWidth >> 1), (maxHeight / 2) + dp2px(32), tipTextPaint);
         //绘制计时器文本
-        canvas.drawText(timeText, (maxWidth / 2), (maxHeight / 2) + dp2px(48), timeTextPaint);
-
+        canvas.drawText(timeText, (maxWidth >> 1), (maxHeight / 2) + dp2px(54), timeTextPaint);
     }
 
 
@@ -300,15 +317,22 @@ public class CircularProgressBar extends View {
     private Interpolator mInterpolator = new LinearInterpolator();
 
     private Paint mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    // 初始波纹半径
+    /**
+     * 初始波纹半径
+     */
     private float mInitialRadius = radius;
-    // 最大波纹半径
+    /**
+     * 最大波纹半径
+     */
     private float mMaxRadius = (getWidth() - 30) / 2;
-    // 一个波纹从创建到消失的持续时间
+    /**
+     * 一个波纹从创建到消失的持续时间
+     */
     private long mDuration = 2000;
-    // 波纹的创建速度，每500ms创建一个
+    /**
+     * 波纹的创建速度，每500ms创建一个
+     */
     private int mSpeed = 500;
-    private boolean mMaxRadiusSet;
 
     private boolean mIsRunning;
     private long mLastCreateTime;
@@ -324,8 +348,12 @@ public class CircularProgressBar extends View {
         }
     };
 
-    public void setColor(int color) {
+    public void setWaveColor(int color) {
         mCirclePaint.setColor(color);
+    }
+
+    public void setWaveWidth(int width) {
+        mCirclePaint.setStrokeWidth(dp2px(width));
     }
 
     public void start() {
@@ -341,7 +369,6 @@ public class CircularProgressBar extends View {
 
     public void setMaxRadius(float maxRadius) {
         mMaxRadius = maxRadius;
-        mMaxRadiusSet = true;
     }
 
     private void newCircle() {
