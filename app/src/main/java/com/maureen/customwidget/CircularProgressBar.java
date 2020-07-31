@@ -11,15 +11,17 @@ import android.view.View;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
-import androidx.core.content.ContextCompat;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import androidx.core.content.ContextCompat;
+
 /**
+ * Function: 波纹效果圆形进度条
+ * Date:   2019/11/30
+ *
  * @author Lianml
- * @date 2019/11/30
  */
 public class CircularProgressBar extends View {
     private static final String TAG = CircularProgressBar.class.getSimpleName();

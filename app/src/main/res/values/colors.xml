@@ -7,4 +7,6 @@
     <color name="blue_dart">#3f5fe6</color>
     <color name="red">#e73746</color>
     <color name="red_dark">#dd1324</color>
+    <color name="grey">#4c4c4c</color>
+    <color name="transparent">#00000000</color>
 </resources>

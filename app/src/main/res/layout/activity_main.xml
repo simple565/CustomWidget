@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:gravity="center">
+    android:gravity="center"
+    tools:context=".MainActivity">
 
     <com.maureen.customwidget.CircularProgressBar
         android:id="@+id/sesame_view"
@@ -15,8 +15,8 @@
         app:barSize="175dp"
         app:barWidth="5dp"
         app:matchNumTextSize="50sp"
-        app:tipTextSize="17sp"
         app:timeTextColor="#ffffff"
-        app:timeTextSize="15sp" />
+        app:timeTextSize="15sp"
+        app:tipTextSize="17sp" />
 
 </LinearLayout>
