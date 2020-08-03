@@ -11,57 +11,86 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * Function:
+ * Function: 时间线控件
  * Create:   2020/7/31
  *
- * @author Administrator
+ * @author Liaml
  */
 public class TimeLineView extends View {
-    private Paint mPaint;
+    private static final String TAG = "TimeLineView";
+
     /**
-     * 首个节点的外半径
+     * 中心圆画笔
      */
-    private float timelineHeadRadius;
+    private Paint mCenterCirclePaint;
     /**
-     * 首个节点的中心颜色
+     * 第一层圆环画笔
      */
-    private int timelineHeadColor;
+    private Paint mFirstArcPaint;
     /**
-     * 首个节点的边缘颜色
+     * 最外层圆环画笔
      */
-    private int timelineHeadColorEdge;
+    private Paint mSecondArcPaint;
     /**
-     * 其他节点的颜色值
+     * 竖线画笔
      */
-    private int timelineOtherColor;
+    private Paint mLinePaint;
+    /**
+     * 节点的中心圆半径
+     */
+    private int mNodeCenterRadius;
+    /**
+     * 节点的第一层圆环半径
+     */
+    private float mNodeFirstRingRadius;
+
+    /**
+     * 节点的最外层圆环半径
+     */
+    private float mNodeSecondRingRadius;
+    /**
+     * 节点的中心圆颜色
+     */
+    private int mNodeCenterColor;
+    /**
+     * 节点的第二层圆环颜色
+     */
+    private int mNodeEdgeColor;
+    /**
+     * 节点最外层圆环颜色
+     */
+    private int mNodeEdgeColorLight;
     /**
      * 时间线的节点数
      */
-    private int timelineCount;
+    private int mNodeCount;
+
     /**
-     * 时间轴的位置
+     * 时间节点间距离，从上一个节点最外层圆环正下方到下一个节点最外层圆环正上方
      */
-    private int viewWidth;
+    private int mNodeDistance;
+
     /**
-     * 时间轴到距离顶部的距离
+     * 时间轴竖线的长度
      */
-    private int marginTop;
+    private int mLineLength;
     /**
-     * 时间轴的节点的半径
+     * 时间轴竖线的宽度
      */
-    private int timelineRadius;
+    private int mLineWidth;
+
     /**
-     * 时间轴节点之间的距离
+     * 时间轴竖线的颜色
      */
-    private int timelineRadiusDistance;
+    private int mLineColor;
+
     /**
-     * 时间轴的宽度
+     * 一个节点所包含内容的View的高度
      */
-    private int timelineWidth;
-    /**
-     * 时间轴的高度
-     */
-    private float timeLineViewHeight;
+    private int mNodeViewHeight;
+
+    private final static int SHIFT_PX = 5;
+
 
     public TimeLineView(Context context) {
         this(context, null);
@@ -69,11 +98,12 @@ public class TimeLineView extends View {
 
     public TimeLineView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        init(context, attrs);
     }
 
     public TimeLineView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init(context, attrs, defStyle);
+        init(context, attrs);
     }
 
     /**
@@ -81,205 +111,74 @@ public class TimeLineView extends View {
      *
      * @param context
      * @param attrs
-     * @param defStyle
      */
-    private void init(Context context, AttributeSet attrs, int defStyle) {
+    private void init(Context context, AttributeSet attrs) {
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.TimeLineView);
+        mNodeCenterRadius = (int) a.getDimension(R.styleable.TimeLineView_timeCenterNodeRadius, convertDp2Px(context, 2));
+        mNodeFirstRingRadius = a.getDimension(R.styleable.TimeLineView_timeNodeFistRingRadius, convertDp2Px(context, 5));
+        mNodeSecondRingRadius = a.getDimension(R.styleable.TimeLineView_timeNodeSecondRingRadius, convertDp2Px(context, 8));
 
-        final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.TimeLineView, defStyle, 0);
-        timelineRadiusDistance = (int) a.getDimension(R.styleable.TimeLineView_timelineRadiusDistance, convertDip2Px(context, 20));
-        timelineHeadRadius = a.getDimension(R.styleable.TimeLineView_timelineHeadRadius, convertDip2Px(context, 6));
-        timelineRadius = (int) a.getDimension(R.styleable.TimeLineView_timelineRadius, convertDip2Px(context, 5));
-        // 中心深色
-        timelineHeadColor = a.getColor(R.styleable.TimeLineView_timelineHeadColor, Color.parseColor("#25ae5f"));
-        // 边缘浅色
-        timelineHeadColorEdge = a.getColor(R.styleable.TimeLineView_timelineHeadColorEdge, Color.parseColor("#b9e5cc"));
-        timelineOtherColor = a.getColor(R.styleable.TimeLineView_timelineOtherColor, Color.parseColor("#cccccc"));
-        timelineCount = a.getInteger(R.styleable.TimeLineView_timelineCount, 0);
-        timelineWidth = (int) a.getDimension(R.styleable.TimeLineView_timelineWidth, convertDip2Px(context, 1));
-        marginTop = (int) a.getDimension(R.styleable.TimeLineView_timelineMarginTop, convertDip2Px(context, 50));
+        mNodeCenterColor = a.getColor(R.styleable.TimeLineView_timeNodeColor, Color.parseColor("#0060ff"));
+        mNodeEdgeColor = a.getColor(R.styleable.TimeLineView_timeNodeEdgeColorLight, Color.parseColor("#330060ff"));
+        mNodeEdgeColorLight = a.getColor(R.styleable.TimeLineView_timeNodeEdgeColor, Color.parseColor("#1a0060ff"));
+        mLineColor = a.getColor(R.styleable.TimeLineView_timeLineColor, Color.parseColor("#e1e2e5"));
+
+        mNodeCount = a.getInteger(R.styleable.TimeLineView_timeNodeCount, 0);
+        mLineWidth = (int) a.getDimension(R.styleable.TimeLineView_timelineWidth, convertDp2Px(context, 1));
+        mNodeDistance = (int) a.getDimension(R.styleable.TimeLineView_timeNodeDistance, convertDp2Px(context, 100));
+        mNodeViewHeight = (int) a.getDimension(R.styleable.TimeLineView_timeNodeViewHeight, convertDp2Px(context, 116));
+        mLineLength = (int) a.getDimension(R.styleable.TimeLineView_timelineLength, mNodeDistance + mNodeSecondRingRadius - mNodeCenterRadius);
+
+        // 设置第一个节点的颜色
+        mCenterCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mCenterCirclePaint.setColor(mNodeCenterColor);
+        mCenterCirclePaint.setStyle(Paint.Style.FILL);
+        // 设置第一个圆环
+        mFirstArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mFirstArcPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mFirstArcPaint.setStrokeWidth(convertDp2Px(context, 2));
+        mFirstArcPaint.setColor(mNodeEdgeColor);
+        // 设置第二个圆环
+        mSecondArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mSecondArcPaint.setColor(mNodeEdgeColorLight);
+        mSecondArcPaint.setStrokeWidth(convertDp2Px(context, 2));
+        mSecondArcPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        // 设置竖线画笔
+        mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mLinePaint.setColor(mLineColor);
         a.recycle();
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-
     }
 
     @SuppressLint("DrawAllocation")
     @Override
     protected void onDraw(Canvas canvas) {
         // 默认设置时间轴的位置位于view的中间
-        viewWidth = getMeasuredWidth() / 2;
-        // 设置第一个节点的颜色
-        mPaint.setColor(timelineHeadColor);
-        /**
-         * 根据时间轴的节点数目，画对应的节点和轴
-         */
-        for (int j = 1; j <= timelineCount; j++) {
+        for (int j = 0; j <= mNodeCount - 1; j++) {
+            // 画节点中心圆
+            canvas.drawCircle(mNodeSecondRingRadius + SHIFT_PX, j * mNodeViewHeight + mNodeSecondRingRadius + SHIFT_PX, mNodeCenterRadius, mCenterCirclePaint);
+            // 画节点第一层圆环
+            canvas.drawCircle(mNodeSecondRingRadius + SHIFT_PX, j * mNodeViewHeight + mNodeSecondRingRadius + SHIFT_PX, mNodeFirstRingRadius, mFirstArcPaint);
+            // 画节点最外层圆环
+            canvas.drawCircle(mNodeSecondRingRadius + SHIFT_PX, j * mNodeViewHeight + mNodeSecondRingRadius + SHIFT_PX, mNodeSecondRingRadius, mSecondArcPaint);
 
-            /**
-             * 当j==1，画第一个节点的时候，有点特殊，我们需要在节点的外面再换一个圆环
-             */
-            if (j == 1) {
-                // 画笔设置为空心
-                canvas.drawCircle(viewWidth, timelineHeadRadius + marginTop,
-                        timelineRadius, mPaint);
-                mPaint.setStyle(Paint.Style.STROKE);
-                mPaint.setStrokeWidth(5.0f);
-                // 画第一个节点外围的圆环
-                mPaint.setColor(timelineHeadColorEdge);
-                canvas.drawCircle(viewWidth, timelineHeadRadius + marginTop,
-                        timelineHeadRadius, mPaint);
-                // 设置画笔颜色，画其他时间节点的颜色
-                mPaint.setColor(timelineOtherColor);
-                // 画笔设置为实心
-                mPaint.setStyle(Paint.Style.FILL);
-                /**
-                 * 画第一个节点下面的轴
-                 */
-                canvas.drawRect(new Rect(viewWidth - timelineWidth / 2,
-                        (int) (2 * timelineHeadRadius + marginTop) + 5,
-                        viewWidth + timelineWidth / 2, (int) (2
-                        * timelineHeadRadius + timelineRadiusDistance
-                        + marginTop + 5)), mPaint);
-                continue;
+            if (j == mNodeCount - 1) {
+                // 最后一个节点不画竖线
+                break;
             }
-            /**
-             * 画时间轴的节点,即画圆形 圆心的x都是一样的,view的中间
-             * 圆心的y的计算是根据节点的位置来计算的,例如:第一个节点的y是根据第一个节点距离上面的距离加上第一个节点的半径
-             * :timelineHeadRadius + marginTop
-             * 其余的节点就是在一个节点的y的基础上,加上两倍半径和节点之间的轴的长度＊节点数:(2 * timelineRadius +
-             * timelineRadiusDistance) * (j - 1) + timelineHeadRadius -
-             * timelineRadius + marginTop
-             *
-             */
-            canvas.drawCircle(viewWidth,
-                    (2 * timelineRadius + timelineRadiusDistance) * (j - 1) + 2
-                            * timelineHeadRadius - timelineRadius + marginTop,
-                    timelineRadius, mPaint);
-            /**
-             * 　 画其余的轴 left:每个轴距离左边距离都是一样的　　　时间轴的中心位置-1/2的时间轴的宽度 viewWidth -
-             * timelineWidth / 2 top: (int) (j * (2 * timelineRadius +
-             * timelineRadiusDistance) - timelineRadiusDistance + 2 *
-             * (timelineHeadRadius-timelineRadius)+ marginTop)　
-             * right:每个轴距离右边距离都是一样的　　　时间轴的中心位置+1/2的时间轴的宽度 viewWidth +
-             * timelineWidth / 2 bottom: (int) (j * (2 * timelineRadius +
-             * timelineRadiusDistance) + 2 *
-             * (timelineHeadRadius-timelineRadius)+ marginTop)
-             */
-
-            canvas.drawRect(
-                    new Rect(
-                            viewWidth - timelineWidth / 2,
-                            (int) (j * (2 * timelineRadius + timelineRadiusDistance) - timelineRadiusDistance + 2 * (timelineHeadRadius - timelineRadius) + marginTop),
-                            viewWidth + timelineWidth / 2,
-                            (int) (j
-                                    * (2 * timelineRadius + timelineRadiusDistance)
-                                    + 2 * (timelineHeadRadius - timelineRadius) + marginTop)),
-                    mPaint);
+            // 画竖线
+            canvas.drawRect(new Rect((int) (mNodeSecondRingRadius - mLineWidth / 2 + SHIFT_PX),
+                    (int) (j * mNodeViewHeight + mNodeSecondRingRadius + mNodeCenterRadius + SHIFT_PX),
+                    (int) (mNodeSecondRingRadius + mLineWidth / 2 + SHIFT_PX),
+                    (int) ((j * mNodeViewHeight + mNodeSecondRingRadius) + mLineLength + mNodeSecondRingRadius + SHIFT_PX)), mLinePaint);
         }
     }
 
-    public float getTimelineHeadRadius() {
-        return timelineHeadRadius;
-    }
-
-    public void setTimelineHeadRadius(float timelineHeadRadius) {
-
-        this.timelineHeadRadius = timelineHeadRadius;
-        invalidate();
-    }
-
-    public int getTimelineHeadColor() {
-        return timelineHeadColor;
-    }
-
-    public void setTimelineHeadColor(int timelineHeadColor) {
-
-        this.timelineHeadColor = timelineHeadColor;
-        invalidate();
-    }
-
-    public int getTimelineOtherColor() {
-        return timelineOtherColor;
-    }
-
-    public void setTimelineOtherColor(int timelineOtherColor) {
-        this.timelineOtherColor = timelineOtherColor;
-        invalidate();
-    }
-
-    public int getTimelineCount() {
-        return timelineCount;
-    }
-
-    public void setTimelineCount(int timelineCount) {
-        this.timelineCount = timelineCount;
-        invalidate();
-    }
-
-    public int getMarginTop() {
-        return marginTop;
-    }
-
-    public void setMarginTop(int marginTop) {
-
-        this.marginTop = marginTop;
-        invalidate();
-    }
-
-    public int getTimelineRadius() {
-        return timelineRadius;
-    }
-
-    public void setTimelineRadius(int timelineRadius) {
-
-        this.timelineRadius = timelineRadius;
-        invalidate();
-    }
-
-    public int getTimelineRadiusDistance() {
-        return timelineRadiusDistance;
-    }
-
-    public void setTimelineRadiusDistance(int timelineRadiusDistance) {
-
-        this.timelineRadiusDistance = timelineRadiusDistance;
-        invalidate();
-    }
-
-    public int getTimelineWidth() {
-        return timelineWidth;
-    }
-
-    public void setTimelineWidth(int timelineWidth) {
-        this.timelineWidth = timelineWidth;
-    }
-
-    public float getTimeLineViewHeight() {
-        this.timeLineViewHeight = getMarginTop() + getTimelineCount()
-                * (2 * getTimelineRadius() + getTimelineRadiusDistance());
-        return timeLineViewHeight;
-    }
-
-    public void setTimeLineViewHeight(float timeLineViewHeight) {
-        this.timeLineViewHeight = timeLineViewHeight;
-        invalidate();
-
-    }
-
-    public int getViewWidth() {
-        return viewWidth;
-    }
-
-    public void setViewWidth(int viewWidth) {
-        this.viewWidth = viewWidth;
-        invalidate();
-    }
 
     /**
-     * 转换dip为px
+     * 转换dp为px
      */
-    public static int convertDip2Px(Context context, int dip) {
-        float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dip * scale + 0.5f * (dip >= 0 ? 1 : -1));
+    private int convertDp2Px(Context context, int dp) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return (int) (dp * density + 0.5f);
     }
 }

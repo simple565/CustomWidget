@@ -27,15 +27,18 @@
     </declare-styleable>
 
     <declare-styleable name="TimeLineView">
-        <attr name="timelineRadius" format="dimension" />
-        <attr name="timelineHeadRadius" format="dimension" />
-        <attr name="timelineHeadColor" format="color" />
-        <attr name="timelineHeadColorEdge" format="color" />
-        <attr name="timelineOtherColor" format="color" />
-        <attr name="timelineRadiusDistance" format="dimension" />
-        <attr name="timelineCount" format="integer" />
-        <attr name="timelineMarginTop" format="dimension" />
+        <attr name="timeNodeColor" format="color" />
+        <attr name="timeNodeEdgeColor" format="color" />
+        <attr name="timeNodeEdgeColorLight" format="color" />
+        <attr name="timeLineColor" format="color" />
+        <attr name="timeCenterNodeRadius" format="dimension" />
+        <attr name="timeNodeFistRingRadius" format="dimension" />
+        <attr name="timeNodeSecondRingRadius" format="dimension" />
+        <attr name="timeNodeDistance" format="dimension" />
+        <attr name="timeNodeCount" format="integer" />
+        <attr name="timeNodeViewHeight" format="dimension" />
         <attr name="timelineWidth" format="dimension" />
+        <attr name="timelineLength" format="dimension" />
     </declare-styleable>
 
 </resources>
